@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  asastarealty:
+    # build:
+    #   context: .
+      # dockerfile: dev.Dockerfile
+    image: asastarealty:latest
+    container_name: asastarealty-backend
+    depends_on: 
+      - reverse-proxy
+    ports:
+      - "8000"
+    labels:
+      # Explicitly tell Traefik to expose this container
+      - "traefik.enable=true"
+      # The domain the service will respond to
+      - "traefik.http.routers.asastarealty.rule=Host(`asastarealty.com`) && PathPrefix(`/api/v1`)"
+      # Allow request only from the predefined entry point named "web"
+      - "traefik.http.routers.asastarealty.entrypoints=web"
+      - "traefik.http.services.my-app.loadbalancer.server.port=8000"
+    env_file: ../../app.env
+    volumes:
+      - ../../:/app
+  reverse-proxy:
+    image: traefik:v2.4
+    container_name: asastarealty-proxy
+    command:
+      - "--api.insecure=true"
+      # Enabling docker provider
+      - "--providers.docker=true"
+      # Do not expose containers unless explicitly told so
+      - "--providers.docker.exposedbydefault=false"
+      # Traefik will listen to incoming request on the port 80 (HTTP)
+      - "--entrypoints.web.address=:80"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      # - /var/run/docker.sock:/var/run/docker.sock
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
