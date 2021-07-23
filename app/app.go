@@ -8,21 +8,21 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jadahbakar/asastarealty-backend/app/middleware"
 	"github.com/jadahbakar/asastarealty-backend/app/response"
+	"github.com/jadahbakar/asastarealty-backend/internal/health"
+	"github.com/jadahbakar/asastarealty-backend/internal/master/bod"
 	"github.com/jadahbakar/asastarealty-backend/pkg/config"
 )
 
 type App struct {
-	engine   *fiber.App
-	config   *config.Config
-	database *sql.DB
-	logger   *os.File
+	engine *fiber.App
+	// config *config.Config
+	// database *sql.DB
+	logger *os.File
 }
 
-func fiberConfig(config *config.Config) *fiber.Config {
+func FiberConfig(config *config.Config) *fiber.Config {
 	// Fiber config.
 	return &fiber.Config{
 		AppName:       config.AppName,
@@ -34,7 +34,7 @@ func fiberConfig(config *config.Config) *fiber.Config {
 	}
 }
 
-func fiberLogger(config *config.Config) *os.File {
+func FiberLogger(config *config.Config) *os.File {
 	// Fiber Create File Logger.
 	file, err := os.OpenFile(fmt.Sprintf("%s%s", config.AppLogFolder, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -43,43 +43,27 @@ func fiberLogger(config *config.Config) *os.File {
 	return file
 }
 
-func SetupApp() *App {
-	// Define Config
-	config, err := config.New()
-	if err != nil {
-		log.Printf("error Loading Config -> %v\n", err)
-	} // Define Server
-	apps := New(config)
-	return apps
-
+func CreateMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
+	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
+	// Health Checking
+	health.AddRoutes(router)
+	// Master BOD
+	bodRepo := bod.NewBodRepository(db)
+	bodService := bod.NewBodService(bodRepo)
+	bod.NewBodHandler(router, bodService)
 }
 
-func New(config *config.Config) *App {
+func New(config *config.Config, db *sql.DB) *App {
 	// Fiber setup.
-	fiberConfig := fiberConfig(config)
-	fiberLogger := fiberLogger(config)
+	fiberConfig := FiberConfig(config)
+	fiberLogger := FiberLogger(config)
 	engine := fiber.New(*fiberConfig)
 	middleware.FiberMiddleware(engine, fiberLogger)
+	CreateMonolith(engine, db, config)
 
-	// Database setup.
-	connConfig, _ := pgx.ParseConfig(config.DbUrl)
-	connStr := stdlib.RegisterConnConfig(connConfig)
-	dbConn, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = dbConn.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// return &App{engine, config, fiberLogger}
+	return &App{engine, fiberLogger}
 
-	defer func() {
-		err := dbConn.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-	return &App{engine, config, dbConn, fiberLogger}
 }
 
 // GetEngine
@@ -92,12 +76,7 @@ func (app *App) GetLogger() *os.File {
 	return app.logger
 }
 
-// GetDB
-func (app *App) GetDB() *sql.DB {
-	return app.database
-}
-
-// GetDB
-func (app *App) GetConfig() *config.Config {
-	return app.config
-}
+// // Get Config
+// func (app *App) GetConfig() *config.Config {
+// 	return app.config
+// }

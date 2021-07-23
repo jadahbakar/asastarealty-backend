@@ -1,12 +1,10 @@
 package bod_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
-	"github.com/jadahbakar/asastarealty-backend/app"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,9 +43,9 @@ func TestIndexRoute(t *testing.T) {
 	}
 
 	// Setup the app as it is done in the main function
-	apps := app.SetupApp()
-	engine := apps.GetEngine()
-	fmt.Printf("Value for engine -> %v", engine)
+	// apps := app.SetupApp()
+	// engine := apps.GetEngine()
+	// fmt.Printf("Value for engine -> %v", engine)
 	// engine := fiber.New(fiber.Config{})
 
 	// Iterate through test single test cases
@@ -62,7 +60,7 @@ func TestIndexRoute(t *testing.T) {
 
 		// Perform the request plain with the app.
 		// The -1 disables request latency.
-		res, err := engine.Test(req, -1)
+		res, err := http.Test(req, -1)
 
 		// verify that no error occured, that is not expected
 		assert.Equalf(t, test.expectedError, err != nil, test.description)

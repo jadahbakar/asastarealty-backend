@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	// new
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jadahbakar/asastarealty-backend/app"
-	"github.com/jadahbakar/asastarealty-backend/internal/health"
-	"github.com/jadahbakar/asastarealty-backend/internal/master/bod"
 	"github.com/jadahbakar/asastarealty-backend/pkg/config"
 	"github.com/jadahbakar/asastarealty-backend/pkg/utils"
 	"github.com/jadahbakar/asastarealty-backend/pkg/version"
@@ -30,32 +30,50 @@ func init() {
 	}
 }
 
-func createMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
-	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
-	// Health Checking
-	health.AddRoutes(router)
-	// Master BOD
-	bodRepo := bod.NewBodRepository(db)
-	bodService := bod.NewBodService(bodRepo)
-	bod.NewBodHandler(router, bodService)
-}
+// func createMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
+// 	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
+// 	// Health Checking
+// 	health.AddRoutes(router)
+// 	// Master BOD
+// 	bodRepo := bod.NewBodRepository(db)
+// 	bodService := bod.NewBodService(bodRepo)
+// 	bod.NewBodHandler(router, bodService)
+// }
 
 func main() {
-	// // Define Config
-	// config, err := config.New()
-	// if err != nil {
-	// 	log.Printf("error Loading Config -> %v\n", err)
-	// }
+	// Define Config
+	log.Printf("Defining Config....")
+	config, err := config.New()
+	if err != nil {
+		log.Printf("error Loading Config -> %v\n", err)
+	}
+
+	// Database setup.
+	log.Printf("Defining Database....")
+	connConfig, _ := pgx.ParseConfig(config.DbUrl)
+	connStr := stdlib.RegisterConnConfig(connConfig)
+	dbConn, err := sql.Open("pgx", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbConn.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// defer func() {
+	// 	err := dbConn.Close()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
 
 	// Define Server
-	// apps := app.New(config)
-	apps := app.SetupApp()
+	log.Printf("Defining Apps....")
+	apps := app.New(config, dbConn)
 	engine := apps.GetEngine()
 	logger := apps.GetLogger()
-	config := apps.GetConfig()
-	db := apps.GetDB()
-	createMonolith(engine, db, apps.GetConfig())
 
 	// Start the Server
-	utils.StartFiberWithGracefulShutdown(engine, db, config, logger)
+	utils.StartFiberWithGracefulShutdown(engine, dbConn, config, logger)
 }
