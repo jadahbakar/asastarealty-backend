@@ -1,9 +1,5 @@
 package bod
 
-import (
-	"log"
-)
-
 type bodService struct {
 	bodRepo BodRepository
 }
@@ -13,11 +9,7 @@ func NewBodService(b BodRepository) BodService {
 }
 
 func (bs *bodService) FindAll() ([]Bod, error) {
-	// return nil, nil
 	res, err := bs.bodRepo.SearchAll()
-	log.Println("Entering BOD Service FindAll Error....")
-	log.Printf("rows Service -> %v", res)
-	log.Printf("err Service  -> %v", err)
 	if err != nil {
 		return nil, err
 	}

@@ -17,13 +17,9 @@ func (br *bodRepository) SearchAll() ([]Bod, error) {
 	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en
 				FROM mst.bod ORDER BY bod_id`
 	rows, err := br.Conn.Query(query)
-	log.Println("Entering BOD Repo SearchAll Error....")
-	log.Printf("rows -> %v", rows)
-	log.Printf("err  -> %v", err)
 	if err != nil {
 		return nil, err
 	}
-
 	result := make([]Bod, 0)
 	t := Bod{}
 	for rows.Next() {
@@ -41,7 +37,7 @@ func (br *bodRepository) SearchAll() ([]Bod, error) {
 	}
 	if rows.Err() != nil {
 		// if any error occurred while reading rows.
-		log.Println("Error will reading user table: \n", err)
+		log.Println("Error will reading mst.bod table: \n", err)
 		return nil, rows.Err()
 	}
 	return result, nil
@@ -50,7 +46,7 @@ func (br *bodRepository) SearchAll() ([]Bod, error) {
 func (br *bodRepository) SearchById(Id int) (Bod, error) {
 	var t Bod
 	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en
-				FROM mst.bod WHERE BY bod_id=?`
+	FROM mst.bod WHERE bod_id=$1`
 	err := br.Conn.QueryRow(query, Id).Scan(
 		&t.BodId,
 		&t.BodCallSign,

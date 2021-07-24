@@ -43,7 +43,7 @@ func FiberLogger(config *config.Config) *os.File {
 	return file
 }
 
-func CreateMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
+func createMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
 	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
 	// Health Checking
 	health.AddRoutes(router)
@@ -59,7 +59,7 @@ func New(config *config.Config, db *sql.DB) *App {
 	fiberLogger := FiberLogger(config)
 	engine := fiber.New(*fiberConfig)
 	middleware.FiberMiddleware(engine, fiberLogger)
-	CreateMonolith(engine, db, config)
+	createMonolith(engine, db, config)
 
 	// return &App{engine, config, fiberLogger}
 	return &App{engine, fiberLogger}

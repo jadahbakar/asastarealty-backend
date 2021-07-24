@@ -1,7 +1,6 @@
 package bod
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,29 +24,18 @@ func NewBodHandler(router fiber.Router, bs BodService) {
 
 func (bh *BodHandler) GetAll(c *fiber.Ctx) error {
 	listBod, err := bh.bodService.FindAll()
-	log.Println("Entering BOD Handler GetAll Error....")
-	log.Printf("rows Handler -> %v", listBod)
-	log.Printf("err Handler  -> %v", err)
 	if err != nil {
 		return response.HandleErrors(c, err)
 	}
-	return response.NewSuccess(c, fiber.StatusOK, "healthty", nil)
+	return response.NewSuccess(c, fiber.StatusOK, "Search All", listBod)
 }
 
 func (bh *BodHandler) GetById(c *fiber.Ctx) error {
-	log.Println("Entering BOD GetById....")
 	paramId := c.Params("id")
 	id, err := strconv.Atoi(paramId)
-	// if error in parsing string to int
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Cannot parse Id",
-		})
+		return response.HandleErrors(c, err)
 	}
 	data, err := bh.bodService.FindById(id)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": data,
-	})
+	return response.NewSuccess(c, fiber.StatusOK, "Search By Id", data)
 }

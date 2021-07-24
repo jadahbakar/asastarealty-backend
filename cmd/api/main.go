@@ -18,7 +18,6 @@ import (
 )
 
 // https://gist.github.com/rnyrnyrny/282fe705d6e8dc012e482582d7c8ec0b
-
 func init() {
 	ver := flag.Bool("version", false, "print version information")
 	v := flag.Bool("v", false, "print version information")
@@ -30,16 +29,6 @@ func init() {
 	}
 }
 
-// func createMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
-// 	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
-// 	// Health Checking
-// 	health.AddRoutes(router)
-// 	// Master BOD
-// 	bodRepo := bod.NewBodRepository(db)
-// 	bodService := bod.NewBodService(bodRepo)
-// 	bod.NewBodHandler(router, bodService)
-// }
-
 func main() {
 	// Define Config
 	log.Printf("Defining Config....")
@@ -48,8 +37,8 @@ func main() {
 		log.Printf("error Loading Config -> %v\n", err)
 	}
 
-	// Database setup.
 	log.Printf("Defining Database....")
+
 	connConfig, _ := pgx.ParseConfig(config.DbUrl)
 	connStr := stdlib.RegisterConnConfig(connConfig)
 	dbConn, err := sql.Open("pgx", connStr)
@@ -60,13 +49,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// defer func() {
-	// 	err := dbConn.Close()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
 
 	// Define Server
 	log.Printf("Defining Apps....")

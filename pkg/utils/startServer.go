@@ -30,10 +30,9 @@ func StartFiberWithGracefulShutdown(fiberApp *fiber.App, db *sql.DB, config *con
 	// fmt.Println("Running cleanup tasks...")
 	log.Printf("Running cleanup tasks...")
 	// Your cleanup tasks go here
-	// db.Close()
-	// redisConn.Close()
-	logFile.Close()
 	db.Close()
+	logFile.Close()
+	// redisConn.Close()
 	// fmt.Println("Fiber was successful shutdown.")
 	log.Println("Fiber was successful shutdown.")
 
