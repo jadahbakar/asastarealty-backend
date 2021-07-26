@@ -10,9 +10,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jadahbakar/asastarealty-backend/app/middleware"
 	"github.com/jadahbakar/asastarealty-backend/app/response"
-	"github.com/jadahbakar/asastarealty-backend/internal/health"
-	"github.com/jadahbakar/asastarealty-backend/internal/master/bod"
-	"github.com/jadahbakar/asastarealty-backend/pkg/config"
+	"github.com/jadahbakar/asastarealty-backend/internal/config"
+	"github.com/jadahbakar/asastarealty-backend/internal/domain/master/bod"
+	"github.com/jadahbakar/asastarealty-backend/internal/domain/master/health"
 )
 
 type App struct {
@@ -25,41 +25,41 @@ type App struct {
 func FiberConfig(config *config.Config) *fiber.Config {
 	// Fiber config.
 	return &fiber.Config{
-		AppName:       config.AppName,
-		Prefork:       config.AppPrefork,
-		CaseSensitive: config.AppCaseSensitive,
-		ReadTimeout:   time.Second * time.Duration(config.AppReadTimeOut),
-		WriteTimeout:  time.Second * time.Duration(config.AppWriteTimeOut),
+		AppName:       config.App.Name,
+		Prefork:       config.App.Prefork,
+		CaseSensitive: config.App.CaseSensitive,
+		ReadTimeout:   time.Second * time.Duration(config.App.ReadTimeOut),
+		WriteTimeout:  time.Second * time.Duration(config.App.WriteTimeOut),
 		ErrorHandler:  response.DefaultErrorHandler,
 	}
 }
 
 func FiberLogger(config *config.Config) *os.File {
 	// Fiber Create File Logger.
-	file, err := os.OpenFile(fmt.Sprintf("%s%s", config.AppLogFolder, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(fmt.Sprintf("%s%s", config.App.LogFolder, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
 	return file
 }
 
-func createMonolith(engine *fiber.App, db *sql.DB, config *config.Config) {
-	router := engine.Group(fmt.Sprintf("%s%s", config.AppURLGroup, config.AppURLVersion))
+func createMonolith(engine *fiber.App, dbClient *sql.DB, config *config.Config) {
+	router := engine.Group(fmt.Sprintf("%s%s", config.App.URLGroup, config.App.URLVersion))
 	// Health Checking
 	health.AddRoutes(router)
 	// Master BOD
-	bodRepo := bod.NewBodRepository(db)
+	bodRepo := bod.NewBodRepository(dbClient)
 	bodService := bod.NewBodService(bodRepo)
 	bod.NewBodHandler(router, bodService)
 }
 
-func New(config *config.Config, db *sql.DB) *App {
+func New(config *config.Config, dbClient *sql.DB) *App {
 	// Fiber setup.
 	fiberConfig := FiberConfig(config)
 	fiberLogger := FiberLogger(config)
 	engine := fiber.New(*fiberConfig)
 	middleware.FiberMiddleware(engine, fiberLogger)
-	createMonolith(engine, db, config)
+	createMonolith(engine, dbClient, config)
 
 	// return &App{engine, config, fiberLogger}
 	return &App{engine, fiberLogger}

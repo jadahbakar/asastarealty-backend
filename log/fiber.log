@@ -46,3 +46,5 @@
 [2021/Jul/24 15:57:29] 72119 | 46c5b146-5f97-41a4-8804-4ba9a75f2e44 | 127.0.0.1| 200 - 4.097946ms | GET | /api/v1/bod/1
 [2021/Jul/24 15:57:31] 72119 | 48c5b146-5f97-41a4-8804-4ba9a75f2e44 | 127.0.0.1| 200 - 3.362784ms | GET | /api/v1/bod/3
 [2021/Jul/24 15:57:45] 72119 | 4ac5b146-5f97-41a4-8804-4ba9a75f2e44 | 127.0.0.1| 200 - 4.215707ms | GET | /api/v1/bod/3
+{"pid":21150, "timestamp":"2021/Jul/26 20:15:35", "status":200, "latency":"380.85243ms", "method":"GET", "path":"/api/v1/bod/3"}
+{"pid":21150, "timestamp":"2021/Jul/26 20:15:49", "status":200, "latency":"35.118µs", "method":"GET", "path":"/api/v1/health"}

@@ -9,14 +9,14 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jadahbakar/asastarealty-backend/pkg/config"
+	"github.com/jadahbakar/asastarealty-backend/internal/config"
 )
 
 func StartFiberWithGracefulShutdown(fiberApp *fiber.App, db *sql.DB, config *config.Config, logFile *os.File) {
 	// Listen from a different goroutine
 	go func() {
-		if err := fiberApp.Listen(fmt.Sprintf(":%d", config.AppPort)); err != nil {
-			messageErr := fmt.Sprintf("Server is not running! on Port %d Reason: %v", config.AppPort, err)
+		if err := fiberApp.Listen(fmt.Sprintf(":%d", config.App.Port)); err != nil {
+			messageErr := fmt.Sprintf("Server is not running! on Port %d Reason: %v", config.App.Port, err)
 			log.Panic(messageErr)
 		}
 	}()
@@ -31,7 +31,9 @@ func StartFiberWithGracefulShutdown(fiberApp *fiber.App, db *sql.DB, config *con
 	log.Printf("Running cleanup tasks...")
 	// Your cleanup tasks go here
 	db.Close()
+	log.Printf("Database Connection is Closed...")
 	logFile.Close()
+	log.Printf("Log File is Closed...")
 	// redisConn.Close()
 	// fmt.Println("Fiber was successful shutdown.")
 	log.Println("Fiber was successful shutdown.")
@@ -60,7 +62,7 @@ func StartServerWithGracefulShutdown(a *fiber.App, config *config.Config, logFil
 	}()
 
 	// Run server.
-	if err := a.Listen(fmt.Sprintf(":%d", config.AppPort)); err != nil {
+	if err := a.Listen(fmt.Sprintf(":%d", config.App.Port)); err != nil {
 		log.Printf("Server is not running! Reason: %v", err)
 	}
 	// Clossing the Fiber Log File
@@ -73,7 +75,7 @@ func StartServerWithGracefulShutdown(a *fiber.App, config *config.Config, logFil
 // StartServer func for starting a simple server.
 func StartServer(a *fiber.App, config *config.Config) {
 	// Run server.
-	if err := a.Listen(fmt.Sprintf(":%d", config.AppPort)); err != nil {
+	if err := a.Listen(fmt.Sprintf(":%d", config.App.Port)); err != nil {
 		log.Printf("Server is not running! Reason: %v", err)
 	}
 }

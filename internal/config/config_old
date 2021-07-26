@@ -26,11 +26,11 @@ type (
 	}
 )
 
-func New() (config *Config, err error) {
+func New(configPath string) (config *Config, err error) {
 	viper.SetConfigFile("app.env")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(configPath)
 	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err != nil {
+	if err = viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file, %s", err)
 	}
 	err = viper.Unmarshal(&config)
