@@ -34,9 +34,11 @@ func FiberConfig(config *config.Config) *fiber.Config {
 	}
 }
 
-func FiberLogger(config *config.Config) *os.File {
+// func FiberLogger(config *config.Config) *os.File {
+func FiberLogger(loggerPath string) *os.File {
 	// Fiber Create File Logger.
-	file, err := os.OpenFile(fmt.Sprintf("%s%s", config.App.LogFolder, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	// file, err := os.OpenFile(fmt.Sprintf("%s%s", config.App.LogFolder, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(fmt.Sprintf("%s%s", loggerPath, "fiber.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -56,7 +58,9 @@ func createMonolith(engine *fiber.App, dbClient *sql.DB, config *config.Config) 
 func New(config *config.Config, dbClient *sql.DB) *App {
 	// Fiber setup.
 	fiberConfig := FiberConfig(config)
-	fiberLogger := FiberLogger(config)
+	// fiberLogger := FiberLogger(config)
+	fiberLogger := FiberLogger(config.App.LogFolder)
+
 	engine := fiber.New(*fiberConfig)
 	middleware.FiberMiddleware(engine, fiberLogger)
 	createMonolith(engine, dbClient, config)

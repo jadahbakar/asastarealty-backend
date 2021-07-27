@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	bod "github.com/jadahbakar/asastarealty-backend/internal/master/bod"
+	bod "github.com/jadahbakar/asastarealty-backend/internal/domain/master/bod"
 	mock "github.com/stretchr/testify/mock"
 )
 

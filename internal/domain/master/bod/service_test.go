@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/jadahbakar/asastarealty-backend/internal/master/bod"
+	"github.com/jadahbakar/asastarealty-backend/internal/domain/master/bod"
 	"github.com/jadahbakar/asastarealty-backend/mocks"
 	"github.com/stretchr/testify/assert"
 )

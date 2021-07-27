@@ -1,5 +1,7 @@
 package logger
 
+// still not used because the fiber logger did'nt support it
+
 import (
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
