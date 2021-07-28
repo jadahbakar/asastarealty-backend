@@ -53,6 +53,7 @@ func createMonolith(engine *fiber.App, dbClient *sql.DB, config *config.Config) 
 	bodRepo := bod.NewBodRepository(dbClient)
 	bodService := bod.NewBodService(bodRepo)
 	bod.NewBodHandler(router, bodService)
+
 }
 
 func New(config *config.Config, dbClient *sql.DB) *App {
