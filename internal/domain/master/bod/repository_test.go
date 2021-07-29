@@ -46,7 +46,8 @@ func TestSearchById(t *testing.T) {
 	}
 	rows := sqlmock.NewRows([]string{"bod_id", "bod_call_sign", "bod_nama_id", "bod_nama_en"}).
 		AddRow(1, "Call Sign 1", "Nama 1", "Name 1")
-	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en FROM mst\.bod WHERE BY bod_id\=\?`
+	// query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en FROM mst\.bod WHERE BY bod_id\=\?`
+	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en FROM mst\.bod WHERE bod_id\=\$1`
 	BodId := int(1)
 	mock.ExpectQuery(query).WillReturnRows(rows)
 	a := bod.NewBodRepository(db)
