@@ -6,9 +6,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/jadahbakar/asastarealty-backend/app"
 	"github.com/jadahbakar/asastarealty-backend/internal/config"
+	"github.com/jadahbakar/asastarealty-backend/internal/domain/master/health"
 	"github.com/stretchr/testify/assert"
+	"github.com/valyala/fasthttp"
 )
 
 func TestGetHealth(t *testing.T) {
@@ -43,4 +46,19 @@ func TestGetHealth(t *testing.T) {
 	// assert expectation
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.Equal(t, "{\"error\":false,\"message\":\"healthty\",\"data\":null}", string(body))
+}
+
+func TestGetHealth_Unit(t *testing.T) {
+	// setup new fiber
+	app := fiber.New()
+
+	// fasthttp context
+	frc := fasthttp.RequestCtx{}
+
+	// context of fiber
+	ctx := app.AcquireCtx(&frc)
+
+	// testing handler
+	err := health.GetHealth(ctx)
+	assert.NoError(t, err)
 }
