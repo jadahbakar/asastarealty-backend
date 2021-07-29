@@ -269,10 +269,12 @@ Dedy Styawan - [dedy.styawan](https://twitter.com/dedystyawan) - dedy.styawan@gm
 * [semver for versioning](https://github.com/Masterminds/semver/)
 * [string to ascii](https://patorjk.com/software/taag/#p=display&h=2&v=3&f=Graceful&t=BUILD)
 * [how-to-build-a-smaller-docker-image](https://medium.com/@gdiener/how-to-build-a-smaller-docker-image-76779e18d48a)
-* [go-docker-dev-environment-with-go-modules-and-live-code-reloading](https://threedots.tech/post/go-docker-dev-environment-with-go-modules-and-live-code-reloading/)t
+* [go-docker-dev-environment-with-go-modules-and-live-code-reloading](https://threedots.tech/post/go-docker-dev-environment-with-go-modules-and-live-code-reloading/)
 * [self-compiling-go-docker-container](https://www.getwrecked.com/self-compiling-go-docker-container/)
 * [Today I Learned: Golang Live-Reload for Development Using Docker Compose + Air](https://medium.com/easyread/today-i-learned-golang-live-reload-for-development-using-docker-compose-air-ecc688ee076)
 * [monitoring-traefik-with-grafana <-- Next Implementation](https://medium.com/platform-engineering/monitoring-traefik-with-grafana-1d037af5b952)
+* [regex](https://regex-escape.com/regex-escaper-online.php)
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
