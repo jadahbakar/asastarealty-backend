@@ -78,7 +78,5 @@ func TestFindById(t *testing.T) {
 		assert.Error(t, err)
 		assert.Equal(t, "error", err.Error())
 		mockBodRepo.AssertExpectations(t)
-		mockBodRepo.AssertExpectations(t)
-
 	})
 }

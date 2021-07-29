@@ -9,17 +9,16 @@ func NewBodService(b BodRepository) BodService {
 }
 
 func (bs *bodService) FindAll() ([]Bod, error) {
-	res, err := bs.bodRepo.SearchAll()
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return bs.bodRepo.SearchAll()
+	// why one linener,
+	// karena tidak ada handle error yang di modif,
+	// hanya menerukan saja, dari repo ke handler
+	// kecuali pada saat ada error ada sebuat custom error atau logic tambahan
 }
 
 func (bs *bodService) FindById(Id int) (res Bod, err error) {
 	res, err = bs.bodRepo.SearchById(Id)
-	if err != nil {
-		return
-	}
 	return
+	// why one linener,
+	// same as above
 }

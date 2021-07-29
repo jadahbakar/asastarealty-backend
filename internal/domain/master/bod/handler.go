@@ -1,6 +1,7 @@
 package bod
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,6 +26,7 @@ func NewBodHandler(router fiber.Router, bs BodService) {
 func (bh *BodHandler) GetAll(c *fiber.Ctx) error {
 	listBod, err := bh.bodService.FindAll()
 	if err != nil {
+		log.Println(err)
 		return response.HandleErrors(c, err)
 	}
 	return response.NewSuccess(c, fiber.StatusOK, "Search All", listBod)
@@ -36,6 +38,6 @@ func (bh *BodHandler) GetById(c *fiber.Ctx) error {
 	if err != nil {
 		return response.HandleErrors(c, err)
 	}
-	data, err := bh.bodService.FindById(id)
+	data, _ := bh.bodService.FindById(id)
 	return response.NewSuccess(c, fiber.StatusOK, "Search By Id", data)
 }
