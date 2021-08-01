@@ -14,17 +14,17 @@ type ResponseError struct {
 }
 
 type BodHandler struct {
-	bodService BodService
+	BodSrv BodService
 }
 
 func NewBodHandler(router fiber.Router, bs BodService) {
-	handler := &BodHandler{bodService: bs}
+	handler := &BodHandler{BodSrv: bs}
 	router.Get("/bod", handler.GetAll)
 	router.Get("/bod/:id", handler.GetById)
 }
 
 func (bh *BodHandler) GetAll(c *fiber.Ctx) error {
-	listBod, err := bh.bodService.FindAll()
+	listBod, err := bh.BodSrv.FindAll()
 	if err != nil {
 		log.Println(err)
 		return response.HandleErrors(c, err)
@@ -38,6 +38,6 @@ func (bh *BodHandler) GetById(c *fiber.Ctx) error {
 	if err != nil {
 		return response.HandleErrors(c, err)
 	}
-	data, _ := bh.bodService.FindById(id)
+	data, _ := bh.BodSrv.FindById(id)
 	return response.NewSuccess(c, fiber.StatusOK, "Search By Id", data)
 }
