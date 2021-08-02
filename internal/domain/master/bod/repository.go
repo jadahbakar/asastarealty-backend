@@ -45,15 +45,17 @@ func (br *bodRepository) SearchAll() ([]Bod, error) {
 
 func (br *bodRepository) SearchById(Id int) (Bod, error) {
 	var t Bod
-	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en
-	FROM mst.bod WHERE bod_id=$1`
+	query := `SELECT bod_id, bod_call_sign, bod_nama_id, bod_nama_en FROM mst.bod WHERE bod_id = $1`
+
 	err := br.Conn.QueryRow(query, Id).Scan(
 		&t.BodId,
 		&t.BodCallSign,
 		&t.BodNamaId,
-		&t.BodNamaEn)
+		&t.BodNamaEn,
+	)
 	if err != nil {
-		log.Println("Error will reading user table: \n", err)
+		return Bod{}, err
 	}
+
 	return t, nil
 }
