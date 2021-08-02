@@ -35,7 +35,6 @@ func New(configPath string) (config *Config, err error) {
 	viper.AddConfigPath(configPath)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
-	// viper.SetConfigFile("app.env")
 	viper.AutomaticEnv()
 	if err = viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file, %s", err)
