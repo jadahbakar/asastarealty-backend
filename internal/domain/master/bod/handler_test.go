@@ -6,10 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/jadahbakar/asastarealty-backend/app"
 	"github.com/jadahbakar/asastarealty-backend/internal/config"
+	"github.com/jadahbakar/asastarealty-backend/internal/domain/master/bod"
 	"github.com/jadahbakar/asastarealty-backend/internal/infrastructure/postgresql"
+	"github.com/jadahbakar/asastarealty-backend/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/valyala/fasthttp"
 )
 
 func TestGetAll(t *testing.T) {
@@ -49,6 +53,20 @@ func TestGetAll(t *testing.T) {
 	// assert expectation
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.NotEmpty(t, string(body))
+}
+
+func TestGetAll_Unit(t *testing.T) {
+	app := fiber.New()
+	fibReqCtx := fasthttp.RequestCtx{}
+	ctx := app.AcquireCtx(&fibReqCtx)
+	assert.NotNil(t, ctx)
+	mockService := new(mocks.BodService)
+	mockService.On("FindAll").Return([]bod.Bod{}, nil)
+	handler := &bod.BodHandler{mockService}
+	assert.NotNil(t, handler)
+
+	err := handler.GetAll(ctx)
+	assert.NoError(t, err)
 }
 
 func TestGetById(t *testing.T) {
