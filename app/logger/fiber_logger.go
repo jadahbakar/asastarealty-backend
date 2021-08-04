@@ -5,6 +5,15 @@ import (
 	"os"
 )
 
+type FiberLog struct {
+	file *os.File
+	err  *error
+}
+
+type FiberLogger interface {
+	Write(path string) (*os.File, error)
+}
+
 // jika ingin advance lagi bisa menggunakan interface,
 func NewFiberLogger(path string) (*os.File, error) {
 	err := createFolderLogIfNotExist(path)
