@@ -1,0 +1,68 @@
+package logger
+
+import (
+	"fmt"
+
+	"github.com/jadahbakar/asastarealty-backend/internal/config"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
+)
+
+var ZapLogger *zap.Logger
+
+func InitLogger(config *config.Config) {
+	//The configuration here is read from my project configuration file. Readers can set it according to their own situation
+	// logPath := config.Cfg.Section("app").Key("logPath").String()
+	// name := config.Cfg.Section("app").Key("name").String()
+	// debug, err := config.Cfg.Section("app").Key("debug").Bool()
+	// if err != nil {
+	// 	debug = false
+	// }
+	fileLogger := fmt.Sprintf("%s/%s", config.App.LogFolder, config.App.Name)
+	hook := lumberjack.Logger{
+		Filename:   fileLogger, // log file path
+		MaxSize:    128,        // size of each log file unit: M
+		MaxAge:     1,          // how many days can the file be saved at most
+		MaxBackups: 30,         // how many backups can log files save at most
+		Compress:   true,       // compress
+	}
+	encoderConfig := zapcore.EncoderConfig{
+		TimeKey:        "ts",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	}
+	//Set log level
+	atomicLevel := zap.NewAtomicLevel()
+	atomicLevel.SetLevel(zap.DebugLevel)
+	var writes = []zapcore.WriteSyncer{zapcore.AddSync(&hook)}
+	//If it's a development environment, it's also exported on the console
+	// if debug {
+	// 	writes = append(writes, zapcore.AddSync(os.Stdout))
+	// }
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.NewMultiWriteSyncer(writes...),
+		atomicLevel,
+	)
+
+	//Open development mode, stack trace
+	caller := zap.AddCaller()
+	//Open file and line number
+	development := zap.Development()
+
+	//Set initialization field
+	field := zap.Fields(zap.String("appName", config.App.Name))
+
+	//Construction log
+	ZapLogger = zap.New(core, caller, development, field)
+	ZapLogger.Info("log initialized successfully")
+}

@@ -1,93 +1,105 @@
 package logger
 
-// still not used because the fiber logger did'nt support it
-
 import (
 	"fmt"
-	"net/url"
 
+	"github.com/jadahbakar/asastarealty-backend/internal/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-const (
-	// DPanic, Panic and Fatal level can not be set by user
-	DebugLevelStr   string = "debug"
-	InfoLevelStr    string = "info"
-	WarningLevelStr string = "warning"
-	ErrorLevelStr   string = "error"
-)
+// error logger
+var errorLogger *zap.SugaredLogger
 
-var (
-	globalLogger zap.Logger
-	devMode      bool = false
-)
-
-type lumberjackSink struct {
-	*lumberjack.Logger
+var levelMap = map[string]zapcore.Level{
+	"debug":  zapcore.DebugLevel,
+	"info":   zapcore.InfoLevel,
+	"warn":   zapcore.WarnLevel,
+	"error":  zapcore.ErrorLevel,
+	"dpanic": zapcore.DPanicLevel,
+	"panic":  zapcore.PanicLevel,
+	"fatal":  zapcore.FatalLevel,
 }
 
-func (lumberjackSink) Sync() error {
-	return nil
+func getLoggerLevel(lvl string) zapcore.Level {
+	if level, ok := levelMap[lvl]; ok {
+		return level
+	}
+	return zapcore.InfoLevel
 }
 
-func Init(logLevel string, logFile string, dev bool) error {
-	devMode = dev
-	var level zapcore.Level
-	switch logLevel {
-	case DebugLevelStr:
-		level = zap.DebugLevel
-	case InfoLevelStr:
-		level = zap.InfoLevel
-	case WarningLevelStr:
-		level = zap.WarnLevel
-	case ErrorLevelStr:
-		level = zap.ErrorLevel
-	default:
-		return fmt.Errorf("unknown log level %s", logLevel)
-	}
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "ts",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-	ll := lumberjack.Logger{
-		Filename:   logFile,
-		MaxSize:    1024, //MB
-		MaxBackups: 30,
-		MaxAge:     90, //days
+func NewLogger(config *config.Config) {
+	fileLogger := fmt.Sprintf("%s/%s", config.App.LogFolder, config.App.Name)
+	level := getLoggerLevel("debug")
+	syncWriter := zapcore.AddSync(&lumberjack.Logger{
+		Filename: fileLogger,
+		// MaxSize:   1 << 30, //1G
+		MaxSize:    128, // size of each log file unit: M
+		MaxAge:     1,   // how many days can the file be saved at most
+		MaxBackups: 30,  // how many backups can log files save at most
+		LocalTime:  true,
 		Compress:   true,
-	}
-	zap.RegisterSink("lumberjack", func(*url.URL) (zap.Sink, error) {
-		return lumberjackSink{
-			Logger: &ll,
-		}, nil
 	})
-	loggerConfig := zap.Config{
-		Level:         zap.NewAtomicLevelAt(level),
-		Development:   dev,
-		Encoding:      "console",
-		EncoderConfig: encoderConfig,
-		OutputPaths:   []string{fmt.Sprintf("lumberjack:%s", logFile)},
-	}
-	_globalLogger, err := loggerConfig.Build()
-	if err != nil {
-		panic(fmt.Sprintf("build zap logger from config error: %v", err))
-	}
-	zap.ReplaceGlobals(_globalLogger)
-	globalLogger = _globalLogger
-	return nil
+	encoder := zap.NewProductionEncoderConfig()
+	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(encoder), syncWriter, zap.NewAtomicLevelAt(level))
+	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	errorLogger = logger.Sugar()
 }
 
-func NewSugar(name string) *zap.SugaredLogger {
-	return globalLogger.Named(name).Sugar()
+func Debug(args ...interface{}) {
+	errorLogger.Debug(args...)
+}
+
+func Debugf(template string, args ...interface{}) {
+	errorLogger.Debugf(template, args...)
+}
+
+func Info(args ...interface{}) {
+	errorLogger.Info(args...)
+}
+
+func Infof(template string, args ...interface{}) {
+	errorLogger.Infof(template, args...)
+}
+
+func Warn(args ...interface{}) {
+	errorLogger.Warn(args...)
+}
+
+func Warnf(template string, args ...interface{}) {
+	errorLogger.Warnf(template, args...)
+}
+
+func Error(args ...interface{}) {
+	errorLogger.Error(args...)
+}
+
+func Errorf(template string, args ...interface{}) {
+	errorLogger.Errorf(template, args...)
+}
+
+func DPanic(args ...interface{}) {
+	errorLogger.DPanic(args...)
+}
+
+func DPanicf(template string, args ...interface{}) {
+	errorLogger.DPanicf(template, args...)
+}
+
+func Panic(args ...interface{}) {
+	errorLogger.Panic(args...)
+}
+
+func Panicf(template string, args ...interface{}) {
+	errorLogger.Panicf(template, args...)
+}
+
+func Fatal(args ...interface{}) {
+	errorLogger.Fatal(args...)
+}
+
+func Fatalf(template string, args ...interface{}) {
+	errorLogger.Fatalf(template, args...)
 }
